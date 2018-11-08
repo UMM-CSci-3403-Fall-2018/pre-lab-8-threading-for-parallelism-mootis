@@ -49,12 +49,42 @@ public class ThreadedSearch<T> implements Searcher<T>, Runnable {
          * threads, wait for them to all terminate, and then return the answer
          * in the shared `Answer` instance.
          */
-        return false;
+
+        Answer answer = new Answer();
+
+        // Create and start a bunch of threads
+        Thread[] threads = new Thread[numThreads];
+
+        for (int i = 0; i < numThreads; i++) {
+            int begin = (list.size() * i) / numThreads;
+            int end = (list.size() * (i + 1)) / numThreads;
+            ThreadedSearch<T> threadedSearch = new ThreadedSearch<T>(target, list, begin, end, answer);
+            // Create and start thread i
+            threads[i] = new Thread(threadedSearch);
+            threads[i].start();
+        }
+
+        // Wait for all the threads to finish
+        for (int i = 0; i < numThreads; i++) {
+          threads[i].join();
+        }
+
+        // Combine their results and wrap up as appropriate to the problem.
+        return answer.getAnswer();
     }
 
     public void run() {
-        // Delete this `throw` when you actually implement this method.
-        throw new UnsupportedOperationException();
+        for (int i = 0; i < end; i++) {
+
+            // Check if answer is true already
+            if (answer.getAnswer()) {
+                return;
+            // Set answer to true otherwise
+            } else {
+                answer.setAnswer();
+                return;
+            }
+        }
     }
 
     private class Answer {
@@ -66,7 +96,7 @@ public class ThreadedSearch<T> implements Searcher<T>, Runnable {
         // again), we can safely not synchronize this, and doing so substantially
         // speeds up the lookup if we add calls to `getAnswer()` to every step in
         // our threaded loops.
-        public boolean getAnswer() {
+        boolean getAnswer() {
             return answer;
         }
 
@@ -76,8 +106,9 @@ public class ThreadedSearch<T> implements Searcher<T>, Runnable {
         // the old value of answer with the new one, and no one will actually
         // call with any value other than `true`. In general, though, you do
         // need to synchronize update methods like this to avoid race conditions.
-        public synchronized void setAnswer(boolean newAnswer) {
-            answer = newAnswer;
+        synchronized void setAnswer() {
+            // Changed because we never need to set to false
+            answer = true;
         }
     }
 
