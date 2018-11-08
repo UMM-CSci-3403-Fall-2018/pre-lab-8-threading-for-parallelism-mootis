@@ -43,6 +43,7 @@ public class Main {
         // with this and see how that changes things. Keep in mind that your number
         // of threads *may* need to evenly divide the length of the list being
         // searched (ARRAY_SIZE in this case).
+        //Searcher<Integer> searcher = new LinearSearch<>();
         Searcher<Integer> searcher = new ThreadedSearch<>(5);
 
         return searcher.search(target, list);

@@ -77,16 +77,15 @@ public class ThreadedSearch<T> implements Searcher<T>, Runnable {
         for (int i = 0; i < end; i++) {
 
             // Check if answer is true already
-            if (answer.getAnswer()) {
-                return;
+            if (answer.getAnswer() == true) {
+                break;
             // Set answer to true otherwise
-            } else {
-                answer.setAnswer();
-                return;
+            }
+            if(list.get(i).equals(target)) {
+                answer.setAnswer(true);
             }
         }
     }
-
     private class Answer {
         private boolean answer = false;
 
@@ -106,9 +105,8 @@ public class ThreadedSearch<T> implements Searcher<T>, Runnable {
         // the old value of answer with the new one, and no one will actually
         // call with any value other than `true`. In general, though, you do
         // need to synchronize update methods like this to avoid race conditions.
-        synchronized void setAnswer() {
-            // Changed because we never need to set to false
-            answer = true;
+        synchronized void setAnswer(boolean newAnswer) {
+            answer = newAnswer;
         }
     }
 
